@@ -42,6 +42,26 @@ if os.environ.get("RESIN_HOST_CONFIG_core_freq")!=None:
 if os.environ.get("RESIN_HOST_CONFIG_dtoverlay")!=None:
   print ("*** UART mode: "+str(os.environ.get('RESIN_HOST_CONFIG_dtoverlay')))
 
+# Check if we have a configuration for Cayenne.
+if os.environ.get("CAYENNE_MONITOR_SCRIPT")!=None:
+  print ("*** Enabling Cayenne monitoring ")
+  try:
+    cayenne_url = 'https://cayenne.mydevices.com/dl/'+os.environ.get("CAYENNE_MONITOR_SCRIPT")
+    print ("Downloading script from "+cayenne_url)
+    req = urllib2.Request(cayenne_url)
+    response = urllib2.urlopen(req, timeout=30)
+    cayenne_response = response.read()
+    # Write content to file
+    tmp_file ="/tmp/"+os.environ.get("CAYENNE_MONITOR_SCRIPT")
+    f = open( tmp_file, 'w' )
+    f.write( cayenne_response )
+    f.close()
+    # Execute script
+    print ("Executing script from "+tmp_file)
+    subprocess.call(["bash", tmp_file, "-v"])
+  except urllib2.URLError as err: 
+    print ("Unable to fetch configuration from Cayenne. Is your CAYENNE_MONITOR_SCRIPT correct?")
+
 
 # Check if the correct environment variables are set
 
